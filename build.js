@@ -24,10 +24,13 @@ let gypJsPath = path.join(
 let files = [];
 let targets;
 let chain = Promise.resolve();
-
+let debug = false;
 initBuild();
 
 function initBuild() {
+  if ('debug' in argv) {
+    debug = true;
+  }
   // Check if a specific runtime has been specified from the command line
   if ('runtime' in argv && 'version' in argv && 'abi' in argv) {
     targets = [[argv['runtime'], argv['version'], argv['abi']]];
@@ -144,6 +147,10 @@ function build(runtime, version, abi) {
       args.push('--dist-url=https://artifacts.electronjs.org/headers/dist');
     }
 
+    if (debug) {
+      args.push('--debug');
+    }
+
     if (parseInt(abi) >= 80) {
       if (arch === 'x64') {
         args.push('--v8_enable_pointer_compression=1');
@@ -178,6 +185,8 @@ function build(runtime, version, abi) {
       process.env.gyp_iohook_arch = arch;
     }
 
+    console.log(`Running: ${gypJsPath} ${args.join(' ')}`)
+
     let proc = spawn(gypJsPath, args, {
       env: process.env,
     });
@@ -193,10 +202,11 @@ function build(runtime, version, abi) {
 }
 
 function tarGz(runtime, abi) {
+  const outputDir = debug ? 'build/Debug' : 'build/Release'
   const FILES_TO_ARCHIVE = {
-    win32: ['build/Release/iohook.node', 'build/Release/uiohook.dll'],
-    linux: ['build/Release/iohook.node', 'build/Release/uiohook.so'],
-    darwin: ['build/Release/iohook.node', 'build/Release/uiohook.dylib'],
+    win32: [`${outputDir}/iohook.node`, `${outputDir}/uiohook.dll`],
+    linux: [`${outputDir}/iohook.node`, `${outputDir}/uiohook.so`],
+    darwin: [`${outputDir}/iohook.node`, `${outputDir}/uiohook.dylib`],
   };
   const tarPath =
     'prebuilds/iohook-v' +

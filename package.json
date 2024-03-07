@@ -12,6 +12,7 @@
   },
   "scripts": {
     "build": "node build.js --upload=false",
+    "build:debug": "node build.js --upload=false --debug",
     "build:ci": "node build.js --all --openssl_fips=''",
     "build:print": "node -e 'require(\"./helpers\").printManualBuildParams()'"
   },
@@ -92,6 +93,11 @@
       "node",
       "18.0.0",
       "108"
+    ],
+    [
+      "node",
+      "16.0.0",
+      "93"
     ]
   ]
 }
